@@ -21,13 +21,24 @@ class MoviesController < ApplicationController
     # get selected sort (if any)
     sortby = params[:sortby]
     
+    # Clear any previous selections
+    session.clear
+    session[:selected_ratings] = []
+    session[:sortby] = ''
+    
+    # Check if user selected any ratings
     if (@selected_ratings.length > 0)
+      # Save selected ratings
+      session[:selected_ratings] = @selected_ratings
+      
+      # Check if user wants to sort
       if (sortby != nil)
         @movies = Movie.where(:rating => @selected_ratings).order(sortby)
       else
         @movies = Movie.where(:rating => @selected_ratings)
       end
     else
+      # Check if user wants to sort
       if (sortby != nil)
         @movies = Movie.order(sortby)
       else
@@ -37,6 +48,8 @@ class MoviesController < ApplicationController
     
     # Check if column heading needs hilighting
     if (sortby != nil)
+      # Save selected sort order
+      session[:sortby] = sortby
       if (sortby == 'title')
         @title_class = 'hilite'
       elsif (sortby == 'release_date')
