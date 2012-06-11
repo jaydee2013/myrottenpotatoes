@@ -8,20 +8,39 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings
+    
+    # get selected ratings (if any)
     if (params[:ratings] != nil)
-      selected_ratings = params[:ratings].keys
-      @movies = Movie.where(:rating => selected_ratings)
+      @selected_ratings = params[:ratings].keys
+    elsif (params[:selected_ratings] != nil)
+      @selected_ratings = params[:selected_ratings].split('$')
     else
-      sortby = params[:sortby]
+      @selected_ratings = []
+    end
+    
+    # get selected sort (if any)
+    sortby = params[:sortby]
+    
+    if (@selected_ratings.length > 0)
+      if (sortby != nil)
+        @movies = Movie.where(:rating => @selected_ratings).order(sortby)
+      else
+        @movies = Movie.where(:rating => @selected_ratings)
+      end
+    else
       if (sortby != nil)
         @movies = Movie.order(sortby)
-        if (sortby == 'title')
-          @title_class = 'hilite'
-        elsif (sortby == 'release_date')
-          @release_date_class = 'hilite'
-        end
       else
         @movies = Movie.all
+      end
+    end
+    
+    # Check if column heading needs hilighting
+    if (sortby != nil)
+      if (sortby == 'title')
+        @title_class = 'hilite'
+      elsif (sortby == 'release_date')
+        @release_date_class = 'hilite'
       end
     end
   end
